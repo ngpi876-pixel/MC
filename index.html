@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="zh-HK">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>數學選擇題練習器</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      background: #0b1020;
+      color: #e5e7eb;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 24px auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #121933;
+      border: 1px solid #243050;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    .muted {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    input,
+    button,
+    select {
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: #22c55e;
+      color: #052e16;
+      font-weight: 700;
+    }
+
+    button.secondary {
+      background: #334155;
+      color: #e5e7eb;
+    }
+
+    .q {
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+      background: #0f172a;
+    }
+
+    .q h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+
+    .opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 8px 0;
+    }
+
+    .opt input {
+      width: auto;
+      margin-top: 2px;
+    }
+
+    .opt .opt-text {
+      display: block;
+      white-space: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      font-size: 15px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .controls .full {
+      grid-column: 1 / -1;
+    }
+
+    .topic-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      background: #0f172a;
+    }
+
+    .topic-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .topic-item input {
+      margin: 0;
+    }
+
+    .hidden-after-generate {
+      display: block;
+    }
+
+    .show-after-generate {
+      display: none;
+    }
+
+    .collapsed .hidden-after-generate {
+      display: none !important;
+    }
+
+    .collapsed .show-after-generate {
+      display: inline-block;
+    }
+
+    @media (max-width: 700px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .controls .full {
+        grid-column: 1 / -1;
+      }
+
+      .controls input,
+      .controls button {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      button {
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+    }
+
+    .result {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .ok {
+      background: #052e16;
+      color: #86efac;
+    }
+
+    .bad {
+      background: #3f1d1d;
+      color: #fca5a5;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    .sticky {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .summary {
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card sticky" id="controlCard">
+      <h1>同類題練習（選擇題）</h1>
+      <p class="muted hidden-after-generate">支援多項題型選擇，可生成 1-100 題、多項選擇作答、交卷批改，答錯會顯示計算方法。</p>
+      <div class="controls">
+        <div id="topicGroup" class="topic-group full hidden-after-generate">
+          <label class="topic-item"><input type="checkbox" name="topic" value="factor" checked> 平方差因式分解：a² -
+            (bm+cn)²</label>
+          <label class="topic-item"><input type="checkbox" name="topic" value="quadratic-k" checked> 二次方程與參數： (x-pk)² =
+            qk²</label>
+          <label class="topic-item"><input type="checkbox" name="topic" value="power-scale" checked>
+            指數題：次方等比例縮放法</label>
+          <label class="topic-item"><input type="checkbox" name="topic" value="least-compare" checked>
+            指數比較：哪個最小？</label>
+          <label class="topic-item"><input type="checkbox" name="topic" value="function-prop" checked> 函數性質：f(k) 與
+            functional
+            identities</label>
+        </div>
+        <input id="count" class="hidden-after-generate" type="number" min="1" max="100" value="10"
+          aria-label="題數（1-100）" />
+        <select id="methodMode" class="hidden-after-generate" aria-label="解題模式">
+          <option value="substitute" selected>解題模式：代入選項法</option>
+          <option value="algebra">解題模式：代數技巧</option>
+        </select>
+        <button id="genBtn" class="hidden-after-generate">生成題目</button>
+        <button id="submitBtn" class="secondary">交卷批改</button>
+        <button id="resetBtn" class="secondary">清除結果</button>
+        <button id="backBtn" class="secondary show-after-generate">返回開始版面</button>
+        <div class="muted full hidden-after-generate">題數（1-100）</div>
+      </div>
+      <p id="summary" class="summary"></p>
+    </section>
+
+    <section id="questions" class="card">
+      <p class="muted">請先按「生成題目」。</p>
+    </section>
+  </main>
+
+  <script>
+    const $controlCard = document.getElementById('controlCard');
+    const $topicGroup = document.getElementById('topicGroup');
+    const $count = document.getElementById('count');
+    const $methodMode = document.getElementById('methodMode');
+    const $genBtn = document.getElementById('genBtn');
+    const $submitBtn = document.getElementById('submitBtn');
+    const $resetBtn = document.getElementById('resetBtn');
+    const $backBtn = document.getElementById('backBtn');
+    const $questions = document.getElementById('questions');
+    const $summary = document.getElementById('summary');
+
+    let quiz = [];
+
+    function randint(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildFunctionPropertyQuestion(i) {
+      // f(x) = ax^2 + bx + c
+      const a = pick([1, 1, 1, 2, 2, 3, -1, -2]); // Weighting a=1 more
+      // To keep symmetry f(k) = f(2h - k) simple, we want 2h = -b/a to be an integer.
+      // So b = -a * S, where S is the sum of roots (or 2 * axis of symmetry)
+      const S = pick([-4, -2, 0, 2, 4]); // S = 2h. Correct identity: f(k) = f(S - k)
+      const b = -a * S;
+      const c = randint(-5, 5);
+
+      function fmtFunc(val, vari, isLead = false) {
+        if (val === 0) return "";
+        let sign = val > 0 ? (isLead ? "" : " + ") : " - ";
+        let absVal = Math.abs(val);
+        let coef = absVal === 1 && vari !== "" ? "" : absVal;
+        return `${sign}${coef}${vari}`;
+      }
+
+      const aText = fmtFunc(a, 'x<sup>2</sup>', true);
+      const bText = b === 0 ? "" : fmtFunc(b, 'x', false);
+      const cText = c === 0 ? "" : (c > 0 ? ` + ${c}` : ` - ${Math.abs(c)}`);
+
+      const funcDisplay = `f(x) = ${aText}${bText}${cText}`;
+      const stem = `設 ${funcDisplay}。若 k 為一常數，則下列何者必為正確？`;
+
+      let rhsIdent;
+      if (S === 0) rhsIdent = "f(-k)";
+      else rhsIdent = `f(${S} - k)`;
+
+      const options = shuffle([
+        { text: `f(k) = ${rhsIdent}`, ok: true },
+        { text: `f(k) = ${S === 0 ? '-f(-k)' : `f(${S === 2 ? 1 : S + 2} - k)`}`, ok: false }, // Shifted or sign-flipped
+        { text: `f(${S / 2 || 2} + k) = f(${S / 2 || 2}) + f(k)`, ok: false }, // Additive fallacy
+        { text: `f(${S / 2 || 2} - k) = f(${S / 2 || 2}) - f(k)`, ok: false }  // Subtractive fallacy
+      ]).map((o, idx) => ({ ...o, label: 'ABCD'[idx] }));
+
+      function calcF(x) { return a * x * x + b * x + c; }
+
+      const algebraMethod = `【代數技巧】<br>左式 = f(k) = ${a === 1 ? '' : (a === -1 ? '-' : a)}k<sup>2</sup> ${b >= 0 ? '+' : '-'}${Math.abs(b)}k ${c >= 0 ? '+' : '-'}${Math.abs(c)}<br>右式 = ${rhsIdent}。將其其代入 f(x)：<br>若為正確選項，展開後應與左式相等。<br>例如針對正確答案：<br>f(${S === 0 ? '-k' : `${S}-k`}) = ${a === 1 ? '' : (a === -1 ? '-' : a)}(${S === 0 ? '-k' : `${S}-k`})<sup>2</sup> ${b >= 0 ? '+' : '-'}${Math.abs(b)}(${S === 0 ? '-k' : `${S}-k`}) ${c >= 0 ? '+' : '-'}${Math.abs(c)}<br>展開並簡化後必得與左式相同的項次。`;
+
+      const kVal = 1;
+      const f_k = calcF(kVal);
+      const subDetails = options.map(o => `${o.label}: 代 k=${kVal}，左式=f(1)=${f_k}；檢查右式值是否相等。`);
+
+      const substituteMethod = `【代入選項法】<br>步驟 1：選取一個適合的常數值，例如令 k = 1。<br>步驟 2：求函數的值。左式 f(k) = f(1) = ${f_k}。<br>步驟 3：根據四個選項的條件，作出檢查。<br>${subDetails.join('<br>')}<br>只有與左式值相同的選項正確。`;
+
+      return { id: i, stem, options, answerLabel: options.find(o => o.ok).label, algebraMethod, substituteMethod, title: '函數的基本性質' };
+    }
+
+    function buildFactorQuestion(i) {
+      const type = pick(['k-sq', 'sq-k', 'sq-sq']);
+      let expr, exprPlain, originalVal, algebraMethod, ansText;
+      let a, b, c, d, k, p, q, m, n, x, y;
+
+      // Helper to format a factor with randomized term order
+      function formatFactor(terms, signs) {
+        const zipped = terms.map((t, idx) => ({ t, s: signs[idx] }));
+        const shuffled = shuffle(zipped);
+        return shuffled.map((item, idx) => {
+          let s = item.s === '+' ? (idx === 0 ? '' : ' + ') : (idx === 0 ? '-' : ' - ');
+          return `${s}${item.t}`;
+        }).join('');
+      }
+
+      function getOptionText(A_terms, A_signs, B_terms, B_signs, isCorrect, signFlip = false) {
+        // A^2 - B^2 = (A + B)(A - B)
+        // Correct answer components:
+        // Factor 1: A + B
+        // Factor 2: A - B
+        let f1_terms = [...A_terms, ...B_terms];
+        let f1_signs = [...A_signs, ...B_signs.map(s => s)]; // A + B
+        let f2_terms = [...A_terms, ...B_terms];
+        let f2_signs = [...A_signs, ...B_signs.map(s => (s === '+' ? '-' : '+'))]; // A - B
+
+        if (!isCorrect) {
+          if (signFlip) {
+            // Distractor: Flip one sign in B
+            const flipIdx = randint(0, B_signs.length - 1);
+            f1_signs[A_signs.length + flipIdx] = (f1_signs[A_signs.length + flipIdx] === '+' ? '-' : '+');
+          } else {
+            // Distractor: (A+B)(A+B) or (A-B)(A-B)
+            f2_signs = [...f1_signs];
+          }
+        }
+
+        let f1 = `(${formatFactor(f1_terms, f1_signs)})`;
+        let f2 = `(${formatFactor(f2_terms, f2_signs)})`;
+        if (Math.random() > 0.5) [f1, f2] = [f2, f1];
+        return `${f1}${f2}`;
+      }
+
+      let A_terms, A_signs, B_terms, B_signs;
+
+      if (type === 'k-sq') {
+        k = randint(4, 18);
+        b = randint(2, 9);
+        c = randint(2, 9);
+        expr = `${k * k} - (${b}m + ${c}n)<sup>2</sup>`;
+        exprPlain = `${k * k} - (${b}m + ${c}n)^2`;
+        A_terms = [`${k}`]; A_signs = ['+'];
+        B_terms = [`${b}m`, `${c}n`]; B_signs = ['+', '+'];
+        originalVal = k * k - (b + c) ** 2; // m=1, n=1
+        algebraMethod = `【代數技巧】設 A=${k}，B=${b}m+${c}n。<br>原式 = A<sup>2</sup>-B<sup>2</sup> = (A+B)(A-B)<br>= (${k}+${b}m+${c}n)(${k}-(${b}m+${c}n))<br>= (${k}+${b}m+${c}n)(${k}-${b}m-${c}n)`;
+      } else if (type === 'sq-k') {
+        b = randint(2, 9);
+        c = randint(2, 9);
+        k = randint(4, 18);
+        expr = `(${b}x + ${c}y)<sup>2</sup> - ${k * k}`;
+        exprPlain = `(${b}x + ${c}y)^2 - ${k * k}`;
+        A_terms = [`${b}x`, `${c}y`]; A_signs = ['+', '+'];
+        B_terms = [`${k}`]; B_signs = ['+'];
+        originalVal = (b + c) ** 2 - k * k; // x=1, y=1
+        algebraMethod = `【代數技巧】設 A=${b}x+${c}y，B=${k}。<br>原式 = A<sup>2</sup>-B<sup>2</sup> = (A+B)(A-B)<br>= (${b}x+${c}y+${k})(${b}x+${c}y-${k})`;
+      } else {
+        b = randint(2, 6);
+        c = randint(2, 6);
+        p = randint(2, 6);
+        q = randint(2, 6);
+        expr = `(${b}m + ${c}n)<sup>2</sup> - (${p}x + ${q}y)<sup>2</sup>`;
+        exprPlain = `(${b}m + ${c}n)^2 - (${p}x + ${q}y)^2`;
+        A_terms = [`${b}m`, `${c}n`]; A_signs = ['+', '+'];
+        B_terms = [`${p}x`, `${q}y`]; B_signs = ['+', '+'];
+        originalVal = (b + c) ** 2 - (p + q) ** 2; // m=1, n=1, x=1, y=1
+        algebraMethod = `【代數技巧】設 A=${b}m+${c}n，B=${p}x+${q}y。<br>原式 = A<sup>2</sup>-B<sup>2</sup> = (A+B)(A-B)<br>= ((${b}m+${c}n)+(${p}x+${q}y))((${b}m+${c}n)-(${p}x+${q}y))<br>= (${b}m+${c}n+${p}x+${q}y)(${b}m+${c}n-${p}x-${q}y)`;
+      }
+
+      function getVal(text) {
+        // Simple numeric evaluation for substitution method (m=1, n=1, x=1, y=1)
+        // This is a bit complex to parse from string, easier to track mathematically
+        return null; // We'll use precalculated values
+      }
+
+      const options = shuffle([
+        { text: getOptionText(A_terms, A_signs, B_terms, B_signs, true), ok: true },
+        { text: getOptionText(A_terms, A_signs, B_terms, B_signs, false, false), ok: false },
+        { text: getOptionText(A_terms, A_signs, B_terms, B_signs, false, true), ok: false },
+        { text: getOptionText(A_terms, A_signs, B_terms, B_signs, false, true), ok: false }
+      ]).map((o, idx) => {
+        // For grading and substitution method text, we need the value
+        // Since getOptionText is randomized, we'll re-calculate value based on sign logic
+        // But for simplicity in this generated exercise, substitution method text will just say "代入數值"
+        return { ...o, label: 'ABCD'[idx], val: isOptionCorrect(type, o.text, originalVal) };
+      });
+
+      function isOptionCorrect(type, text, target) {
+        // In a real app we'd parse, but here we can just check 'ok' property
+        return null;
+      }
+
+      const substituteMethod = `【代入選項法】代入變數皆為 1。<br>原式 = ${originalVal}。<br>檢查各選項代入後的值，只有正確選項會等於 ${originalVal}。`;
+
+      return { id: i, stem: `因式分解：${expr}`, options, answerLabel: options.find(o => o.ok).label, algebraMethod, substituteMethod, title: '平方差因式分解' };
+    }
+
+    function buildQuadraticKQuestion(i) {
+      const p = randint(2, 6);
+      const q = pick([1, 4, 9, 16]);
+      const s = Math.sqrt(q);
+      const r1 = p + s;
+      const r2 = p - s;
+
+      const stem = `設 k 為常數，解方程：(x - ${p}k)<sup>2</sup> = ${q}k<sup>2</sup>。`;
+
+      const options = shuffle([
+        { text: `x = ${r1}k`, ok: false, roots: [r1] },
+        { text: `x = ${r2}k`, ok: false, roots: [r2] },
+        { text: `x = ${r1}k 或 x = ${r2}k`, ok: true, roots: [r1, r2] },
+        { text: `x = -${r1}k 或 x = ${r2}k`, ok: false, roots: [-r1, r2] }
+      ]).map((o, idx) => ({ ...o, label: 'ABCD'[idx] }));
+
+      const algebraMethod = `【代數技巧】<br>(x-${p}k)<sup>2</sup>=${q}k<sup>2</sup> ⇒ x-${p}k=±${s}k<br>所以 x=(${p}±${s})k，即 x=${r1}k 或 x=${r2}k。`;
+      const subLines = options.map(o => {
+        const check = o.roots.map(v => `(x=${v}k): (${v}-${p})² ${((v - p) * (v - p) === q) ? '=' : '≠'} ${q}`).join('； ');
+        return `${o.label}: ${check}`;
+      });
+      const substituteMethod = `【代入選項法】先令 k=1，方程變成 (x-${p})<sup>2</sup>=${q}。<br>${subLines.join('<br>')}<br>同時符合方程的根組合為正確選項。`;
+
+      return { id: i, stem, options, answerLabel: options.find(o => o.ok).label, algebraMethod, substituteMethod, title: '二次方程與參數' };
+    }
+
+    function buildPowerScaleQuestion(i) {
+      const pack = pick([
+        { a: 8, b: 5, base: 10, pa: 3, pb: 1 },
+        { a: 4, b: 25, base: 10, pa: 1, pb: 2 },
+        { a: 8, b: 125, base: 10, pa: 3, pb: 3 },
+        { a: 16, b: 25, base: 10, pa: 4, pb: 2 }
+      ]);
+
+      const t = pick([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+      const z = randint(1, 6);
+      const A = Number((pack.pb * t * z).toFixed(3));
+      const B = Number((pack.pa * t * z).toFixed(3));
+
+      const k = Number((pack.pa * A).toFixed(3));
+      const stem = `${pack.a}<sup>${A}</sup> · ${pack.b}<sup>${B}</sup> =`;
+
+      const options = shuffle([
+        { text: `${pack.base}<sup>${k}</sup>`, ok: true, exp: k },
+        { text: `${pack.base}<sup>${k + t}</sup>`, ok: false, exp: k + t },
+        { text: `${pack.a * pack.b}<sup>${Math.max(1, Math.floor(k / 2))}</sup>`, ok: false, exp: null },
+        { text: `${pack.base}<sup>${Math.max(1, k - t)}</sup>`, ok: false, exp: Math.max(1, k - t) }
+      ]).map((o, idx) => ({ ...o, label: 'ABCD'[idx] }));
+
+      const scaleCandidates = [10, 100, 1000];
+      const strategies = [
+        ...scaleCandidates.map(s => ({ op: 'divide', s })),
+        ...scaleCandidates.map(s => ({ op: 'multiply', s }))
+      ];
+
+      const chosen = strategies
+        .map(st => {
+          const f = st.op === 'divide' ? (v) => v / st.s : (v) => v * st.s;
+          const tScaled = f(k);
+          const aScaled = f(A);
+          const bScaled = f(B);
+          const avg = (aScaled + bScaled + tScaled) / 3;
+          const inRangePenalty = (tScaled < 1 || tScaled > 10) ? 100 : 0;
+          const score = inRangePenalty + Math.abs(avg - 5.5);
+          return { ...st, score, aScaled, bScaled, tScaled };
+        })
+        .sort((x, y) => x.score - y.score)[0];
+
+      const actionText = chosen.op === 'divide' ? `除 ${chosen.s}` : `乘 ${chosen.s}`;
+      const scaledA = chosen.aScaled;
+      const scaledB = chosen.bScaled;
+      const targetScaled = chosen.tScaled;
+      const transform = (v) => chosen.op === 'divide' ? v / chosen.s : v * chosen.s;
+
+      const compareLines = options.map(o => {
+        if (o.exp == null) return `${o.label}: 不是同底 ${pack.base} 的標準形式，先排除。`;
+        return `${o.label}: ${pack.base}<sup>${o.exp}</sup> → ${actionText} 後 ${pack.base}<sup>${transform(o.exp).toFixed(2)}</sup>`;
+      });
+
+      const substituteMethod = `【次方等比例縮放法】<br>先判斷次方大小，從「除/乘 10、100、1000」揀最易比較方案；本題選「${actionText}」。<br>把全部次方同時 ${actionText}（比例不變）：<br>原式 ${pack.a}<sup>${A}</sup>·${pack.b}<sup>${B}</sup> → ${pack.a}<sup>${scaledA}</sup>·${pack.b}<sup>${scaledB}</sup> = ${pack.base}<sup>${targetScaled}</sup>。<br>再把選項次方做同樣處理，比較最吻合者。<br>${compareLines.join('<br>')}`;
+
+      const algebraMethod = `【代數技巧】\n${pack.a}=2<sup>${pack.pa}</sup>，${pack.b}=5<sup>${pack.pb}</sup>。\n原式 = 2<sup>${pack.pa * A}</sup>·5<sup>${pack.pb * B}</sup>。\n依題目構造可合併成 (2·5)<sup>${k}</sup> = ${pack.base}<sup>${k}</sup>。`;
+
+      return { id: i, stem, options, answerLabel: options.find(o => o.ok).label, algebraMethod, substituteMethod, title: '指數題：次方等比例縮放法' };
+    }
+
+    function buildLeastCompareQuestion(i) {
+      const oddExp = pick([101, 203, 305, 407, 509, 611, 713, 815]);
+      const evenExp = oddExp + 1;
+      const a = randint(200, 600);
+      const b = randint(200, 600);
+      const cNum = randint(1, 5);
+      const cDen = randint(6, 12);
+      const dNum = randint(2, 6);
+      const dDen = randint(7, 13);
+
+      const A = `(-${a})<sup>${evenExp}</sup>`;
+      const B = `${b}<sup>-${oddExp}</sup>`;
+      const C = `(${cNum}/${cDen})<sup>${oddExp}</sup>`;
+      const D = `(${dNum}/${dDen})<sup>${evenExp}</sup>`;
+
+      const values = [
+        { key: 'A', text: A, value: Math.pow(-a, evenExp) },
+        { key: 'B', text: B, value: Math.pow(b, -oddExp) },
+        { key: 'C', text: C, value: Math.pow(cNum / cDen, oddExp) },
+        { key: 'D', text: D, value: Math.pow(dNum / dDen, evenExp) }
+      ];
+
+      const min = values.reduce((m, v) => (v.value < m.value ? v : m), values[0]);
+      const options = values.map((v, idx) => ({ label: 'ABCD'[idx], text: v.text, ok: v.key === min.key }));
+
+      const scale = 100;
+      const substituteMethod = `【次方縮小法（除 10 的次方）】<br>本題用除 10<sup>2</sup>（即除 ${scale}）縮小次方比較：<br>- A: (-${a})<sup>${evenExp}</sup> → (-${a})<sup>${(evenExp / scale).toFixed(2)}</sup><br>- B: ${b}<sup>-${oddExp}</sup> → ${b}<sup>${(-oddExp / scale).toFixed(2)}</sup><br>- C: (${cNum}/${cDen})<sup>${oddExp}</sup> → (${cNum}/${cDen})<sup>${(oddExp / scale).toFixed(2)}</sup><br>- D: (${dNum}/${dDen})<sup>${evenExp}</sup> → (${dNum}/${dDen})<sup>${(evenExp / scale).toFixed(2)}</sup><br>縮小後比較：負次方（B）代表倒數，最接近 0，故最小是 ${min.key}。`;
+
+      const algebraMethod = `【次方縮小法（除 10 的次方）】<br>把各選項次方同除 10<sup>2</sup> 後再比較：<br>B 保持負次方（倒數型），而 A 為大於 1 的偶次方型，C、D 為 0 到 1 之間的正次方型。<br>所以最小值為 ${min.key}。`;
+
+      return { id: i, stem: '下列哪一個最小？', options, answerLabel: min.key, algebraMethod, substituteMethod, title: '指數比較：哪個最小？' };
+    }
+
+    function buildQuestion(i, topic) {
+      if (topic === 'quadratic-k') return buildQuadraticKQuestion(i);
+      if (topic === 'power-scale') return buildPowerScaleQuestion(i);
+      if (topic === 'least-compare') return buildLeastCompareQuestion(i);
+      if (topic === 'function-prop') return buildFunctionPropertyQuestion(i);
+      return buildFactorQuestion(i);
+    }
+
+    function renderQuiz() {
+      if (!quiz.length) {
+        $questions.innerHTML = '<p class="muted">請先按「生成題目」。</p>';
+        return;
+      }
+
+      $questions.innerHTML = quiz.map(q => `
+          <div class="q" data-id="${q.id}">
+            <div class="muted" style="margin-bottom: 5px;">[${q.title}]</div>
+            <h3>${q.id}. ${q.stem}</h3>
+            ${q.options.map(opt => `
+              <label class="opt">
+                <input type="radio" name="q-${q.id}" value="${opt.label}">
+                <span class="opt-text">${opt.label}. ${opt.text}</span>
+              </label>
+            `).join('')}
+            <div id="result-${q.id}" class="result hide"></div>
+          </div>
+        `).join('');
+    }
+
+    function generate() {
+      const selectedTopics = Array.from($topicGroup.querySelectorAll('input[name="topic"]:checked')).map(el => el.value);
+      if (selectedTopics.length === 0) {
+        alert('請至少選擇一個題型');
+        return;
+      }
+
+      let n = parseInt($count.value, 10);
+      if (Number.isNaN(n) || n < 1) n = 1;
+      if (n > 100) n = 100;
+      $count.value = n;
+
+      quiz = Array.from({ length: n }, (_, idx) => {
+        const topic = pick(selectedTopics);
+        return buildQuestion(idx + 1, topic);
+      });
+
+      const modeText = $methodMode.value === 'algebra' ? '代數技巧' : '代入選項法';
+      $summary.textContent = `已生成 ${n} 題，解題模式：${modeText}。請作答後按「交卷批改」。`;
+      $controlCard.classList.add('collapsed');
+      renderQuiz();
+    }
+
+    function grade() {
+      if (!quiz.length) {
+        alert('請先生成題目');
+        return;
+      }
+
+      let answered = 0;
+      let correct = 0;
+
+      for (const q of quiz) {
+        const checked = document.querySelector(`input[name="q-${q.id}"]:checked`);
+        const box = document.getElementById(`result-${q.id}`);
+        box.classList.remove('hide', 'ok', 'bad');
+
+        if (!checked) {
+          box.classList.add('bad');
+          box.innerHTML = `未作答。正確答案：${q.answerLabel}`;
+          continue;
+        }
+
+        answered++;
+        if (checked.value === q.answerLabel) {
+          correct++;
+          box.classList.add('ok');
+          box.innerHTML = `✅ 正確（答案：${q.answerLabel}）`;
+        } else {
+          box.classList.add('bad');
+          const methodText = $methodMode.value === 'algebra' ? q.algebraMethod : q.substituteMethod;
+          box.innerHTML = `❌ 錯誤，你選 ${checked.value}；正確答案：${q.answerLabel}<br>${methodText}`;
+        }
+      }
+
+      const total = quiz.length;
+      const wrong = total - correct;
+      $summary.textContent = `完成批改：${correct}/${total} 正確（錯 ${wrong} 題；已作答 ${answered} 題）。`;
+    }
+
+    function resetResult() {
+      for (const q of quiz) {
+        const checked = document.querySelector(`input[name="q-${q.id}"]:checked`);
+        if (checked) checked.checked = false;
+        const box = document.getElementById(`result-${q.id}`);
+        if (box) {
+          box.className = 'result hide';
+          box.textContent = '';
+        }
+      }
+      if (quiz.length) $summary.textContent = `已清除作答，可重新練習。`;
+    }
+
+    function backToStart() {
+      $controlCard.classList.remove('collapsed');
+      $summary.textContent = '已返回開始版面，可重新選擇題型與設定。';
+    }
+
+    $genBtn.addEventListener('click', generate);
+    $submitBtn.addEventListener('click', grade);
+    $resetBtn.addEventListener('click', resetResult);
+    $backBtn.addEventListener('click', backToStart);
+  </script>
+</body>
+
+</html>
