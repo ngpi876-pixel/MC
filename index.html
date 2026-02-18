@@ -6,11 +6,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>數學選擇題練習器</title>
   <style>
+    :root {
+      --base-font-size: 16px;
+    }
+
+    /* Midnight Theme (Default) */
+    body.theme-midnight {
+      --bg-main: #0b1020;
+      --bg-card: #121933;
+      --bg-input: #0f172a;
+      --text-primary: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-text: #052e16;
+      --border: #243050;
+      --q-border: #334155;
+      --ok-bg: #052e16;
+      --ok-text: #86efac;
+      --bad-bg: #3f1d1d;
+      --bad-text: #fca5a5;
+    }
+
+    /* Solarized Light Theme */
+    body.theme-solar {
+      --bg-main: #fdf6e3;
+      --bg-card: #eee8d5;
+      --bg-input: #eee8d5;
+      --text-primary: #586e75;
+      --text-muted: #93a1a1;
+      --accent: #b58900;
+      --accent-text: #fdf6e3;
+      --border: #dcd3b8;
+      --q-border: #93a1a1;
+      --ok-bg: #859900;
+      --ok-text: #fdf6e3;
+      --bad-bg: #dc322f;
+      --bad-text: #fdf6e3;
+    }
+
+    /* Cyberpunk Theme */
+    body.theme-cyber {
+      --bg-main: #000000;
+      --bg-card: #0d0d0d;
+      --bg-input: #1a1a1a;
+      --text-primary: #00ff41;
+      --text-muted: #008f11;
+      --accent: #ff00ff;
+      --accent-text: #000000;
+      --border: #00ff41;
+      --q-border: #00ff41;
+      --ok-bg: #00ff41;
+      --ok-text: #000000;
+      --bad-bg: #ff0000;
+      --bad-text: #ffffff;
+    }
+
+    /* Sepia Theme */
+    body.theme-sepia {
+      --bg-main: #f4ecd8;
+      --bg-card: #e8dab9;
+      --bg-input: #e0cf9f;
+      --text-primary: #5b4636;
+      --text-muted: #8c7b6c;
+      --accent: #d35400;
+      --accent-text: #fef9ef;
+      --border: #c9b38c;
+      --q-border: #a68b6a;
+      --ok-bg: #27ae60;
+      --ok-text: #fef9ef;
+      --bad-bg: #c0392b;
+      --bad-text: #fef9ef;
+    }
+
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-      background: #0b1020;
-      color: #e5e7eb;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      font-size: var(--base-font-size);
+      transition: background 0.3s, color 0.3s;
     }
 
     .wrap {
@@ -20,8 +94,8 @@
     }
 
     .card {
-      background: #121933;
-      border: 1px solid #243050;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 14px;
@@ -32,47 +106,48 @@
     }
 
     .muted {
-      color: #9ca3af;
-      font-size: 14px;
+      color: var(--text-muted);
+      font-size: 0.875rem;
     }
 
     input:not([type="checkbox"]):not([type="radio"]),
     button,
     select {
       border-radius: 10px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #e5e7eb;
+      border: 1px solid var(--q-border);
+      background: var(--bg-input);
+      color: var(--text-primary);
       padding: 10px;
+      font-size: 1rem;
     }
 
     input[type="checkbox"],
     input[type="radio"] {
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
       cursor: pointer;
-      accent-color: #22c55e;
+      accent-color: var(--accent);
     }
 
     button {
       cursor: pointer;
       border: none;
-      background: #22c55e;
-      color: #052e16;
+      background: var(--accent);
+      color: var(--accent-text);
       font-weight: 700;
     }
 
     button.secondary {
-      background: #334155;
-      color: #e5e7eb;
+      background: var(--text-muted);
+      color: var(--bg-main);
     }
 
     .q {
-      border: 1px solid #334155;
+      border: 1px solid var(--q-border);
       border-radius: 12px;
       padding: 12px;
       margin: 10px 0;
-      background: #0f172a;
+      background: var(--bg-input);
     }
 
     .q h3 {
@@ -97,7 +172,7 @@
       white-space: nowrap;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      font-size: 15px;
+      font-size: 0.9375rem;
     }
 
     .controls {
@@ -116,9 +191,9 @@
       flex-direction: column;
       gap: 12px;
       padding: 12px;
-      border: 1px solid #334155;
+      border: 1px solid var(--q-border);
       border-radius: 10px;
-      background: #0f172a;
+      background: var(--bg-input);
     }
 
     .topic-item {
@@ -149,6 +224,60 @@
       display: inline-block;
     }
 
+    .theme-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .font-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .font-sample {
+      padding: 12px;
+      border: 1px dashed var(--q-border);
+      border-radius: 8px;
+      background: var(--bg-main);
+      text-align: center;
+      font-size: var(--base-font-size);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--q-border);
+      appearance: none;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
     @media (max-width: 700px) {
       .controls {
         grid-template-columns: 1fr;
@@ -174,18 +303,18 @@
       margin-top: 8px;
       padding: 8px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 0.875rem;
       white-space: pre-wrap;
     }
 
     .ok {
-      background: #052e16;
-      color: #86efac;
+      background: var(--ok-bg);
+      color: var(--ok-text);
     }
 
     .bad {
-      background: #3f1d1d;
-      color: #fca5a5;
+      background: var(--bad-bg);
+      color: var(--bad-text);
     }
 
     .hide {
@@ -205,6 +334,7 @@
 </head>
 
 <body>
+  <button id="theme-btn" class="theme-btn" title="切換主題">🎨</button>
   <main class="wrap">
     <section class="card sticky" id="controlCard">
       <h1>同類題練習（選擇題）</h1>
@@ -222,6 +352,17 @@
           <label class="topic-item"><input type="checkbox" name="topic" value="function-prop" checked> 函數性質：f(k) 與
             functional
             identities</label>
+        </div>
+
+        <div class="font-controls full hidden-after-generate">
+          <div class="slider-row">
+            <span class="muted">字體大小</span>
+            <input type="range" id="font-slider" min="12" max="24" value="16">
+            <span id="font-val" class="muted">16px</span>
+          </div>
+          <div class="font-sample" id="font-sample">
+            這是預覽文字：(x + y)² = x² + 2xy + y²
+          </div>
         </div>
         <input id="count" class="hidden-after-generate" type="number" min="1" max="100" value="10"
           aria-label="題數（1-100）" />
@@ -646,6 +787,48 @@
       $controlCard.classList.remove('collapsed');
       $summary.textContent = '已返回開始版面，可重新選擇題型與設定。';
     }
+
+    // --- Theme & Font Persistence Logic ---
+    const themes = ["theme-midnight", "theme-solar", "theme-cyber", "theme-sepia"];
+    let currentThemeIdx = 0;
+
+    function applyTheme(idx) {
+      document.body.classList.remove(...themes);
+      document.body.classList.add(themes[idx]);
+      localStorage.setItem("math_theme_idx", idx);
+      currentThemeIdx = idx;
+    }
+
+    function applyFontSize(size) {
+      document.documentElement.style.setProperty('--base-font-size', size + 'px');
+      const $slider = document.getElementById('font-slider');
+      const $val = document.getElementById('font-val');
+      if ($slider) $slider.value = size;
+      if ($val) $val.innerText = size + 'px';
+      localStorage.setItem("math_font_size", size);
+    }
+
+    // Initialize
+    const savedTheme = localStorage.getItem("math_theme_idx");
+    if (savedTheme !== null) {
+      applyTheme(parseInt(savedTheme));
+    } else {
+      applyTheme(0);
+    }
+
+    const savedFont = localStorage.getItem("math_font_size");
+    if (savedFont !== null) {
+      applyFontSize(parseInt(savedFont));
+    }
+
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      const nextIdx = (currentThemeIdx + 1) % themes.length;
+      applyTheme(nextIdx);
+    });
+
+    document.getElementById('font-slider').addEventListener('input', (e) => {
+      applyFontSize(e.target.value);
+    });
 
     $genBtn.addEventListener('click', generate);
     $submitBtn.addEventListener('click', grade);
