@@ -36,7 +36,7 @@
       font-size: 14px;
     }
 
-    input,
+    input:not([type="checkbox"]):not([type="radio"]),
     button,
     select {
       border-radius: 10px;
@@ -44,6 +44,14 @@
       background: #0f172a;
       color: #e5e7eb;
       padding: 10px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #22c55e;
     }
 
     button {
@@ -105,9 +113,9 @@
 
     .topic-group {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 10px;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
       border: 1px solid #334155;
       border-radius: 10px;
       background: #0f172a;
@@ -150,7 +158,7 @@
         grid-column: 1 / -1;
       }
 
-      .controls input,
+      .controls input:not([type="checkbox"]),
       .controls button {
         width: 100%;
         min-height: 44px;
